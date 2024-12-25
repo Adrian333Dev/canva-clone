@@ -8,7 +8,7 @@ import {
   util,
 } from "fabric";
 import { useCallback, useEffect, useRef } from "react";
-import { FabricObjectWithName } from "../models/types";
+import { FabricObjectWithName } from "../types";
 import { useDebouncedCallback } from "@/hooks/use-debounce-cb";
 
 interface IUseAutoResizeProps {

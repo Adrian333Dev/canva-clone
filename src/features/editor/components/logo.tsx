@@ -10,7 +10,7 @@ export const Logo = () => {
           alt="logo"
           fill
           className="shring-0 hover:opacity-75 transition"
-          priority={false}
+          priority={true}
         />
       </div>
     </Link>
