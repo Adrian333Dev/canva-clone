@@ -100,3 +100,14 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.circle-picker {
+  width: auto !important;
+}
+
+.chrome-picker {
+  width: auto !important;
+  box-shadow: none !important;
+  border-radius: var(--radius) !important;
+  overflow: hidden !important;
+}

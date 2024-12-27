@@ -15,12 +15,27 @@ import {
   CIRCLE_OPTIONS,
   DIAMOND_OPTIONS,
   Editor,
+  EditorHookProps,
   FabricObjectWithName,
+  FILL_COLOR,
   RECTANGE_OPTIONS,
+  STROKE_COLOR,
+  STROKE_WIDTH,
   TRIANGLE_OPTIONS,
 } from "../types";
+import { useCanvasEvents } from "./use-canvas-events";
+import { isTextType } from "../utils";
 
-const buildEditor = ({ canvas }: BuildEditorProps): Editor => {
+const buildEditor = ({
+  canvas,
+  selectedObjects,
+  fillColor,
+  strokeColor,
+  strokeWidth,
+  setFillColor,
+  setStrokeColor,
+  setStrokeWidth,
+}: BuildEditorProps): Editor => {
   const getWorkspace = () => {
     return (canvas.getObjects() as FabricObjectWithName[]).find(
       (obj) => obj.name === "clip"
@@ -39,20 +54,52 @@ const buildEditor = ({ canvas }: BuildEditorProps): Editor => {
   };
 
   return {
+    changeFillColor: (color: string) => {
+      setFillColor(color);
+      canvas.getActiveObjects().forEach((obj) => {
+        obj.set("fill", color);
+      });
+      canvas.renderAll();
+    },
+    changeStrokeColor: (color: string) => {
+      setStrokeColor(color);
+      canvas.getActiveObjects().forEach((obj) => {
+        if (isTextType(obj.type)) obj.set("fill", color);
+        else obj.set("stroke", color);
+      });
+      canvas.renderAll();
+    },
+    changeStrokeWidth: (width: number) => {
+      setStrokeWidth(width);
+      canvas.getActiveObjects().forEach((obj) => {
+        obj.set("strokeWidth", width);
+      });
+      canvas.renderAll();
+    },
     addCircle: () => {
-      const obj = new Circle({ ...CIRCLE_OPTIONS });
+      const obj = new Circle({ ...CIRCLE_OPTIONS, fill: fillColor });
       addToCanvas(obj);
     },
     addSoftRectangle: () => {
-      const obj = new Rect({ ...RECTANGE_OPTIONS, rx: 10, ry: 10 });
+      const obj = new Rect({
+        ...RECTANGE_OPTIONS,
+        rx: 10,
+        ry: 10,
+        fill: fillColor,
+      });
       addToCanvas(obj);
     },
     addRectangle: () => {
-      const obj = new Rect({ ...RECTANGE_OPTIONS });
+      const obj = new Rect({ ...RECTANGE_OPTIONS, fill: fillColor });
       addToCanvas(obj);
     },
     addTriangle: () => {
-      const obj = new Triangle({ ...RECTANGE_OPTIONS, rx: 10, ry: 10 });
+      const obj = new Triangle({
+        ...RECTANGE_OPTIONS,
+        rx: 10,
+        ry: 10,
+        fill: fillColor,
+      });
       addToCanvas(obj);
     },
     addInverseTriangle: () => {
@@ -63,7 +110,7 @@ const buildEditor = ({ canvas }: BuildEditorProps): Editor => {
           { x: WIDTH, y: 0 },
           { x: WIDTH / 2, y: HEIGHT },
         ],
-        { ...TRIANGLE_OPTIONS }
+        { ...TRIANGLE_OPTIONS, fill: fillColor }
       );
       addToCanvas(obj);
     },
@@ -76,22 +123,53 @@ const buildEditor = ({ canvas }: BuildEditorProps): Editor => {
           { x: WIDTH / 2, y: HEIGHT },
           { x: 0, y: HEIGHT / 2 },
         ],
-        { ...DIAMOND_OPTIONS }
+        { ...DIAMOND_OPTIONS, fill: fillColor }
       );
       addToCanvas(obj);
     },
+
+    canvas,
+    selectedObjects,
+    getActiveFillColor: () => {
+      const selectedObj = selectedObjects[0];
+      if (!selectedObj) return fillColor;
+      return selectedObj.get("fill");
+    },
+    getActiveStrokeColor: () => {
+      const selectedObj = selectedObjects[0];
+      if (!selectedObj) return strokeColor;
+      return selectedObj.get("stroke");
+    },
+    strokeWidth,
   };
 };
 
-export const useEditor = () => {
+export const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
   const [canvas, useCanvas] = useState<Canvas | null>(null);
   const [container, useContainer] = useState<HTMLDivElement | null>(null);
+  const [selectedObjects, setSelectedObjects] = useState<FabricObject[]>([]);
+
+  const [fillColor, setFillColor] = useState(FILL_COLOR);
+  const [strokeColor, setStrokeColor] = useState(STROKE_COLOR); 
+  const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTH);
 
   useAutoResize({ canvas, container });
 
+  useCanvasEvents({ canvas, setSelectedObjects, clearSelectionCallback });
+
   const editor = useMemo(() => {
-    if (canvas) return buildEditor({ canvas });
-  }, [canvas]);
+    if (canvas)
+      return buildEditor({
+        canvas,
+        fillColor,
+        strokeColor,
+        strokeWidth,
+        setFillColor,
+        setStrokeColor,
+        setStrokeWidth,
+        selectedObjects,
+      });
+  }, [canvas, selectedObjects, fillColor, strokeColor, strokeWidth]);
 
   const init = useCallback(
     ({
@@ -131,17 +209,6 @@ export const useEditor = () => {
 
       useCanvas(initialCanvas);
       useContainer(initialContainer);
-
-      // const tempRect = new Rect({
-      //   width: 100,
-      //   height: 100,
-      //   name: "temp",
-      //   fill: "red",
-      //   left: 500,
-      //   top: 300,
-      // });
-
-      // initialCanvas.add(tempRect);
     },
     []
   );
