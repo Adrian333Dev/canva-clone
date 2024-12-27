@@ -22,7 +22,7 @@ export const StrokeColorSidebar: FC<StrokeColorSidebarProps> = ({
   activeTool,
   onChangeActiveTool,
 }) => {
-  const value = editor?.getActiveFillColor() || STROKE_COLOR;
+  const value = editor?.getActiveStrokeColor() || STROKE_COLOR;
   const onClose = () => onChangeActiveTool("select");
   const onChange = (color: string) => editor?.changeStrokeColor(color);
 

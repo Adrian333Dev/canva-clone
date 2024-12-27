@@ -20,6 +20,7 @@ import {
   FILL_COLOR,
   RECTANGE_OPTIONS,
   STROKE_COLOR,
+  STROKE_DASH_ARRAY,
   STROKE_WIDTH,
   TRIANGLE_OPTIONS,
 } from "../types";
@@ -32,9 +33,11 @@ const buildEditor = ({
   fillColor,
   strokeColor,
   strokeWidth,
+  strokeDashArray,
   setFillColor,
   setStrokeColor,
   setStrokeWidth,
+  setStrokeDashArray,
 }: BuildEditorProps): Editor => {
   const getWorkspace = () => {
     return (canvas.getObjects() as FabricObjectWithName[]).find(
@@ -76,6 +79,13 @@ const buildEditor = ({
       });
       canvas.renderAll();
     },
+    changeStrokeDashArray: (values: number[]) => {
+      setStrokeDashArray(values);
+      canvas.getActiveObjects().forEach((obj) => {
+        obj.set("strokeDashArray", values);
+      });
+      canvas.renderAll();
+    },
     addCircle: () => {
       const obj = new Circle({ ...CIRCLE_OPTIONS, fill: fillColor });
       addToCanvas(obj);
@@ -86,6 +96,7 @@ const buildEditor = ({
         rx: 10,
         ry: 10,
         fill: fillColor,
+        strokeDashArray,
       });
       addToCanvas(obj);
     },
@@ -99,6 +110,7 @@ const buildEditor = ({
         rx: 10,
         ry: 10,
         fill: fillColor,
+        strokeDashArray,
       });
       addToCanvas(obj);
     },
@@ -110,7 +122,7 @@ const buildEditor = ({
           { x: WIDTH, y: 0 },
           { x: WIDTH / 2, y: HEIGHT },
         ],
-        { ...TRIANGLE_OPTIONS, fill: fillColor }
+        { ...TRIANGLE_OPTIONS, fill: fillColor, strokeDashArray }
       );
       addToCanvas(obj);
     },
@@ -123,7 +135,7 @@ const buildEditor = ({
           { x: WIDTH / 2, y: HEIGHT },
           { x: 0, y: HEIGHT / 2 },
         ],
-        { ...DIAMOND_OPTIONS, fill: fillColor }
+        { ...DIAMOND_OPTIONS, fill: fillColor, strokeDashArray }
       );
       addToCanvas(obj);
     },
@@ -140,18 +152,29 @@ const buildEditor = ({
       if (!selectedObj) return strokeColor;
       return selectedObj.get("stroke");
     },
-    strokeWidth,
+    getActiveStrokeWidth: () => {
+      const selectedObj = selectedObjects[0];
+      if (!selectedObj) return strokeWidth;
+      return selectedObj.get("strokeWidth");
+    },
+    getActiveStrokeDashArray: () => {
+      const selectedObj = selectedObjects[0];
+      if (!selectedObj) return strokeDashArray;
+      return selectedObj.get("strokeDashArray");
+    },
   };
 };
 
 export const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
-  const [canvas, useCanvas] = useState<Canvas | null>(null);
-  const [container, useContainer] = useState<HTMLDivElement | null>(null);
+  const [canvas, setCanvas] = useState<Canvas | null>(null);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [selectedObjects, setSelectedObjects] = useState<FabricObject[]>([]);
 
   const [fillColor, setFillColor] = useState(FILL_COLOR);
-  const [strokeColor, setStrokeColor] = useState(STROKE_COLOR); 
+  const [strokeColor, setStrokeColor] = useState(STROKE_COLOR);
   const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTH);
+  const [strokeDashArray, setStrokeDashArray] =
+    useState<number[]>(STROKE_DASH_ARRAY);
 
   useAutoResize({ canvas, container });
 
@@ -164,12 +187,21 @@ export const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
         fillColor,
         strokeColor,
         strokeWidth,
+        strokeDashArray,
         setFillColor,
         setStrokeColor,
         setStrokeWidth,
+        setStrokeDashArray,
         selectedObjects,
       });
-  }, [canvas, selectedObjects, fillColor, strokeColor, strokeWidth]);
+  }, [
+    canvas,
+    selectedObjects,
+    fillColor,
+    strokeColor,
+    strokeWidth,
+    strokeDashArray,
+  ]);
 
   const init = useCallback(
     ({
@@ -207,8 +239,8 @@ export const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
       initialCanvas.centerObject(initialWorkspace);
       initialCanvas.clipPath = initialWorkspace;
 
-      useCanvas(initialCanvas);
-      useContainer(initialContainer);
+      setCanvas(initialCanvas);
+      setContainer(initialContainer);
     },
     []
   );

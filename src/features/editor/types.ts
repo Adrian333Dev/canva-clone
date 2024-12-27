@@ -70,9 +70,12 @@ export type BuildEditorProps = {
   fillColor: string;
   strokeColor: string;
   strokeWidth: number;
+  strokeDashArray: number[];
+
   setFillColor: (color: string) => void;
   setStrokeColor: (color: string) => void;
   setStrokeWidth: (width: number) => void;
+  setStrokeDashArray: (dashArray: number[]) => void;
 };
 
 export interface Editor {
@@ -85,14 +88,16 @@ export interface Editor {
 
   getActiveFillColor: () => string;
   getActiveStrokeColor: () => string;
+  getActiveStrokeWidth: () => number;
+  getActiveStrokeDashArray: () => number[];
 
   changeFillColor: (color: string) => void;
   changeStrokeColor: (color: string) => void;
   changeStrokeWidth: (width: number) => void;
+  changeStrokeDashArray: (values: number[]) => void;
 
   canvas: Canvas;
   selectedObjects: FabricObject[];
-  strokeWidth: number;
 }
 
 export interface EditorHookProps {
@@ -104,6 +109,7 @@ export interface EditorHookProps {
 export const FILL_COLOR: string = tailwindColors.gray[300];
 export const STROKE_COLOR: string = tailwindColors.gray[600];
 export const STROKE_WIDTH = 2;
+export const STROKE_DASH_ARRAY = [];
 
 export const GLOBAL_OBJECT_WIDTH = 200;
 

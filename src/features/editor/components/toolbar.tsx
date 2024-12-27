@@ -6,6 +6,7 @@ import { ActiveTool, ActiveTools, Editor, FILL_COLOR } from "../types";
 import { Hint } from "@/components/hint";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { BsBorderWidth } from "react-icons/bs";
 
 interface ToolbarProps {
   editor?: Editor;
@@ -42,6 +43,8 @@ export const Toolbar: FC<ToolbarProps> = ({
             />
           </Button>
         </Hint>
+      </div>
+      <div className="flex items-center h-full justify-center">
         <Hint label="Stroke color" side="bottom" sideOffset={5}>
           <Button
             onClick={() => onChangeActiveTool(ActiveTools.STROKE_COLOR)}
@@ -55,6 +58,20 @@ export const Toolbar: FC<ToolbarProps> = ({
               className="rounded-sm size-4 border-2"
               style={{ borderColor: strokeColor }}
             />
+          </Button>
+        </Hint>
+      </div>
+      <div className="flex items-center h-full justify-center">
+        <Hint label="Stroke width" side="bottom" sideOffset={5}>
+          <Button
+            onClick={() => onChangeActiveTool(ActiveTools.STROKE_WIDTH)}
+            size={"icon"}
+            variant={"ghost"}
+            className={cn(
+              activeTool === ActiveTools.STROKE_WIDTH && "bg-gray-800"
+            )}
+          >
+            <BsBorderWidth className="size-4" />
           </Button>
         </Hint>
       </div>
